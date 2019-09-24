@@ -4,7 +4,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/jlaffaye/ftp"
 	"os"
@@ -15,9 +14,9 @@ import (
 var addr = "paste.cf:21"
 var pub = "incoming"
 var max = 10 * 1024 * 1024
+var stdin_name = "file"
 
-// upload files to a connection
-func upload() {
+func login() *ftp.ServerConn {
 	c, err := ftp.Dial(addr, ftp.DialWithTimeout(5*time.Second))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "pcf: dial: %v\n", err)
@@ -26,31 +25,44 @@ func upload() {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "pcf: login: %v\n", err)
 	}
-	data := bytes.NewBufferString("Hello World\n")
-	err = c.Stor(path.Join(pub, "test-file.txt"), data)
+	return c
+}
+
+func store(f *os.File, c *ftp.ServerConn, n string) {
+	err := c.Stor(path.Join(pub, n), f)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "pcf: put: %v\n", err)
 	}
-	err = c.Quit()
+}
+
+func exit(c *ftp.ServerConn) {
+	err := c.Quit()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "pcf: quit: %v\n", err)
 	}
 }
 
+func put(f *os.File, n string) {
+	c := login()
+	store(f, c, n)
+	exit(c)
+}
+
 func main() {
 	files := os.Args[1:]
 	if len(files) == 0 {
-		upload()
+		// use stdin data
+		put(os.Stdin, stdin_name)
 	} else {
+		// loop through and use all arguments
 		for _, arg := range files {
 			f, err := os.Open(arg)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "pcf: %v\n", err)
 				continue
 			}
-			upload()
+			put(f, arg)
 			f.Close()
 		}
 	}
-	fmt.Println("Done")
 }
