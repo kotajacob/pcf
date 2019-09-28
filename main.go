@@ -98,7 +98,6 @@ func main() {
 			// calculate the hash
 			h := hash(f)
 			// print the url
-			fmt.Println(h)
 			u.Path = h + filepath.Ext(arg)
 			fmt.Println(u)
 		}
