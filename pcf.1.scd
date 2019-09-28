@@ -2,15 +2,16 @@ pcf(1) [""["pcf-VERSION"]]
 
 # NAME
 
-pcf - blah blah
+pcf - Upload files to paste.cf style paste server
 
 # SYNOPSIS
 
-pcf [options] [files]
+pcf [files]
 
 # DESCRIPTION
 
-blah blah
+pcf reads either a list of files as arguments or data from stdin. Then it
+uploads it with ftp and prints the resulting url to stdout.
 
 # AUTHORS
 
