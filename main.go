@@ -23,7 +23,7 @@ var stdin_name = "file"
 
 // create the ftp connection
 func login(u *url.URL) *ftp.ServerConn {
-	c, err := ftp.Dial(u.Host+":"+port, ftp.DialWithTimeout(5*time.Second))
+	c, err := ftp.Dial(u.Host+":"+port, ftp.DialWithTimeout(10*time.Second))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "pcf: dial: %v\n", err)
 	}
