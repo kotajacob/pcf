@@ -17,7 +17,6 @@ import (
 
 var addr = "https://paste.cf"
 var port = "21"
-var max = 10 * 1024 * 1024
 var pub = "incoming"
 var stdin_name = "file"
 
