@@ -37,3 +37,11 @@ Uninstall
 ----------
 
 `sudo make uninstall`
+
+Resources
+----------
+
+[Send patches](https://git-send-email.io) and questions to
+[~kota/pcf@lists.sr.ht](https://lists.sr.ht/~kota/pcf).
+
+Bugs & todo here: [~kota/pcf](https://todo.sr.ht/~kota/pcf)
