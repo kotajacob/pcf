@@ -93,7 +93,7 @@ func main() {
 			defer f.Close()
 
 			// upload the file
-			put(f, arg, u)
+			put(f, filepath.Base(arg), u)
 			// calculate the hash
 			h := hash(f)
 			// print the url
