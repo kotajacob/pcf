@@ -53,6 +53,7 @@ func exit(c *ftp.ServerConn) {
 func put(f *os.File, n string, u *url.URL) {
 	if _, err := f.Seek(0, 0); err != nil {
 		fmt.Fprintf(os.Stderr, "pcf: failed to read: %v\n", err)
+		os.Exit(1)
 	}
 	c := login(u)
 	store(f, c, n)
@@ -63,6 +64,7 @@ func put(f *os.File, n string, u *url.URL) {
 func hash(f *os.File) string {
 	if _, err := f.Seek(0, 0); err != nil {
 		fmt.Fprintf(os.Stderr, "pcf: failed to read: %v\n", err)
+		os.Exit(1)
 	}
 	h := sha1.New()
 	if _, err := io.Copy(h, f); err != nil {
