@@ -18,7 +18,6 @@ import (
 var addr = "https://paste.cf"
 var port = "21"
 var pub = "incoming"
-var stdin_name = "file"
 
 // create the ftp connection
 func login(u *url.URL) *ftp.ServerConn {
@@ -82,7 +81,7 @@ func main() {
 	files := os.Args[1:]
 	if len(files) == 0 {
 		// use stdin data
-		put(os.Stdin, stdin_name, u)
+		put(os.Stdin, "file", u)
 		hash(os.Stdin)
 	} else {
 		// loop through and use all arguments
