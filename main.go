@@ -15,13 +15,11 @@ import (
 	"time"
 )
 
-var addr = "https://paste.cf"
-var port = "21"
-var pub = "incoming"
+var addr = os.Getenv("PCFSERVER")
 
 // create the ftp connection
 func login(u *url.URL) *ftp.ServerConn {
-	c, err := ftp.Dial(u.Host+":"+port, ftp.DialWithTimeout(10*time.Second))
+	c, err := ftp.Dial(u.Host, ftp.DialWithTimeout(10*time.Second))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "pcf: dial: %v\n", err)
 	}
@@ -32,9 +30,9 @@ func login(u *url.URL) *ftp.ServerConn {
 	return c
 }
 
-// store the passed file in the passed connection
-func store(f *os.File, c *ftp.ServerConn, n string) {
-	err := c.Stor(path.Join(pub, n), f)
+// store the file in the connection
+func store(u *url.URL, f *os.File, c *ftp.ServerConn, n string) {
+	err := c.Stor(path.Join(u.Path, n), f)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "pcf: put: %v\n", err)
 	}
@@ -55,7 +53,7 @@ func put(f *os.File, n string, u *url.URL) {
 		os.Exit(1)
 	}
 	c := login(u)
-	store(f, c, n)
+	store(u, f, c, n)
 	exit(c)
 }
 
@@ -78,14 +76,14 @@ func main() {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "pcf: url configuration wrong: %v\n", err)
 	}
-	files := os.Args[1:]
-	if len(files) == 0 {
+	args := os.Args[1:]
+	if len(args) == 0 {
 		// use stdin data
 		put(os.Stdin, "file", u)
 		hash(os.Stdin)
 	} else {
 		// loop through and use all arguments
-		for _, arg := range files {
+		for _, arg := range args {
 			f, err := os.Open(arg)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "pcf: open: %v\n", err)
@@ -98,6 +96,7 @@ func main() {
 			// calculate the hash
 			h := hash(f)
 			// print the url
+			u.Host = u.Hostname()
 			u.Path = h + filepath.Ext(arg)
 			fmt.Println(u)
 		}

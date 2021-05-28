@@ -4,9 +4,10 @@ pcf
 A simple paste.cf command line client. Reads file(s) from STDIN or filename as
 argument, uploads to a paste.cf server, and prints the url(s) to STDOUT.
 
-Config files are read to retrieve server information. Optionally server
-information can be provided via arguments. See pcf(1) for command line client
-information and pcf(5) for config file format information.
+The PCFSERVER environment variable is used to declare server information. An
+example in your shellrc would be `export
+PCFSERVER='https://paste.example.com:21/incoming'`. The port and path are optional
+and will depend on how the pcf server you're using is configured.
 
 License
 --------
