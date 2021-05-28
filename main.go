@@ -71,6 +71,10 @@ func hash(f *os.File) string {
 }
 
 func main() {
+	if addr == "" {
+		fmt.Println("pcf: you must set the PCFSERVER environment variable!")
+		os.Exit(1)
+	}
 	// parse the url
 	u, err := url.Parse(addr)
 	if err != nil {
