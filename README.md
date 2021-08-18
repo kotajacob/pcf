@@ -1,7 +1,7 @@
 pcf
 ====
 
-A simple command line sha1/FTP-based pastbin client. Reads file(s) from STDIN or
+A simple command line sha1/FTP-based pastebin client. Reads file(s) from STDIN or
 filename as argument, uploads file(s) to a server, and prints the url(s) to
 STDOUT.
 
