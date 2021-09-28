@@ -6,22 +6,21 @@ package main
 import (
 	"crypto/sha1"
 	"fmt"
-	"github.com/jlaffaye/ftp"
 	"io"
 	"net/url"
 	"os"
 	"path"
 	"path/filepath"
 	"time"
-)
 
-var addr = os.Getenv("PCFSERVER")
+	"github.com/jlaffaye/ftp"
+)
 
 // create the ftp connection
 func login(u *url.URL) *ftp.ServerConn {
 	c, err := ftp.Dial(u.Host, ftp.DialWithTimeout(10*time.Second))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "pcf: dial: %v\n", err)
+		fmt.Fprintf(os.Stderr, "pcf: %v\n", err)
 	}
 	err = c.Login("anonymous", "anonymous")
 	if err != nil {
@@ -71,16 +70,19 @@ func hash(f *os.File) string {
 }
 
 func main() {
+	addr := os.Getenv("PCFSERVER")
 	if addr == "" {
 		fmt.Println("pcf: you must set the PCFSERVER environment variable!")
 		os.Exit(1)
 	}
+
 	// parse the url
 	u, err := url.Parse(addr)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "pcf: url configuration wrong: %v\n", err)
 	}
 	args := os.Args[1:]
+
 	if len(args) == 0 {
 		// use stdin data
 		put(os.Stdin, "file", u)
@@ -97,8 +99,10 @@ func main() {
 
 			// upload the file
 			put(f, filepath.Base(arg), u)
+
 			// calculate the hash
 			h := hash(f)
+
 			// print the url
 			u.Host = u.Hostname()
 			u.Path = h + filepath.Ext(arg)
