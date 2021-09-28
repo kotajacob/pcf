@@ -4,6 +4,7 @@
 package main
 
 import (
+	"bytes"
 	"crypto/sha1"
 	"fmt"
 	"io"
@@ -15,19 +16,6 @@ import (
 
 	"github.com/jlaffaye/ftp"
 )
-
-// calculate and print the hash
-func hash(f *os.File) string {
-	if _, err := f.Seek(0, 0); err != nil {
-		fmt.Fprintf(os.Stderr, "pcf: failed to read: %v\n", err)
-		os.Exit(1)
-	}
-	h := sha1.New()
-	if _, err := io.Copy(h, f); err != nil {
-		fmt.Fprintf(os.Stderr, "pcf: failed to hash: %v\n", err)
-	}
-	return fmt.Sprintf("%x", h.Sum(nil))
-}
 
 func main() {
 	addr := os.Getenv("PCFSERVER")
@@ -45,10 +33,22 @@ func main() {
 
 	if len(args) == 0 {
 		// use stdin data
-		c := login(ftpURL)
-		store(ftpURL, os.Stdin, c, "file")
-		exit(c)
-		h := hash(os.Stdin)
+		inBytes, err := io.ReadAll(os.Stdin)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "pcf: failed reading stdin: %v\n", err)
+			os.Exit(1)
+		}
+		// create reader (that supports seek) from stdinBytes
+		in := bytes.NewReader(inBytes)
+		connection := login(ftpURL)
+		store(ftpURL, in, connection, "file")
+		exit(connection)
+		// calculate the hash (setting the reader to byte 0 first)
+		if _, err := in.Seek(0, 0); err != nil {
+			fmt.Fprintf(os.Stderr, "pcf: failed to read: %v\n", err)
+			os.Exit(1)
+		}
+		h := hash(in)
 		webURL := *ftpURL
 		webURL.Host = ftpURL.Hostname()
 		webURL.Path = h
@@ -64,13 +64,14 @@ func main() {
 			}
 			defer file.Close()
 
+			// store the file
+			store(ftpURL, file, connection, filepath.Base(arg))
+
+			// calculate the hash (setting the reader to byte 0 first)
 			if _, err := file.Seek(0, 0); err != nil {
 				fmt.Fprintf(os.Stderr, "pcf: failed to read: %v\n", err)
 				os.Exit(1)
 			}
-			store(ftpURL, file, connection, filepath.Base(arg))
-
-			// calculate the hash
 			h := hash(file)
 
 			// print the URL
@@ -97,11 +98,20 @@ func login(u *url.URL) *ftp.ServerConn {
 }
 
 // store the file in the connection
-func store(u *url.URL, f *os.File, c *ftp.ServerConn, n string) {
-	err := c.Stor(path.Join(u.Path, n), f)
+func store(u *url.URL, r io.Reader, c *ftp.ServerConn, n string) {
+	err := c.Stor(path.Join(u.Path, n), r)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "pcf: put: %v\n", err)
 	}
+}
+
+// calculate and print the hash
+func hash(f io.Reader) string {
+	h := sha1.New()
+	if _, err := io.Copy(h, f); err != nil {
+		fmt.Fprintf(os.Stderr, "pcf: failed to hash: %v\n", err)
+	}
+	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
 // close the ftp connection
