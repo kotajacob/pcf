@@ -33,7 +33,7 @@ func main() {
 
 	if len(args) == 0 {
 		// use stdin data
-		inBytes, err := io.ReadAll(os.Stdin)
+		inBytes, err := ReadAll(os.Stdin)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "pcf: failed reading stdin: %v\n", err)
 			os.Exit(1)
@@ -119,5 +119,25 @@ func exit(c *ftp.ServerConn) {
 	err := c.Quit()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "pcf: quit: %v\n", err)
+	}
+}
+
+// ReadAll is from go 1.16
+// Implementing it ourself allows building in older go versions.
+func ReadAll(r io.Reader) ([]byte, error) {
+	b := make([]byte, 0, 512)
+	for {
+		if len(b) == cap(b) {
+			// Add more capacity (let append pick how much).
+			b = append(b, 0)[:len(b)]
+		}
+		n, err := r.Read(b[len(b):cap(b)])
+		b = b[:len(b)+n]
+		if err != nil {
+			if err == io.EOF {
+				err = nil
+			}
+			return b, err
+		}
 	}
 }
