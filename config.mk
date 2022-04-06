@@ -1,7 +1,7 @@
-# pcf
-# Copyright (C) 2019 Dakota Walsh
+# pcf - A command line sha1/FTP-based pastebin client.
+# Copyright (C) 2022 Dakota Walsh
 # GPL3+ See LICENSE in this repo for details.
-VERSION = 2.0.4
+VERSION = 3.0.0
 
 # Customize below to fit your system
 
